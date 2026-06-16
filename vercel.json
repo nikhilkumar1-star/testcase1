@@ -3,7 +3,5 @@
   "outputDirectory": ".output/public",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": null,
-  "engines": {
-    "node": "20.x"
-  }
+  "nodeVersion": "20.x"
 }
