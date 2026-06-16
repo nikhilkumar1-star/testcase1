@@ -77,6 +77,9 @@ writeFileSync('.vercel/output/functions/ssr.func/.vc-config.json', JSON.stringif
   shouldAddHelpers: true,
 }));
 
+// Mark function as ESM
+writeFileSync('.vercel/output/functions/ssr.func/package.json', JSON.stringify({ type: 'module' }));
+
 // Step 8: Write Vercel routing config
 writeFileSync('.vercel/output/config.json', JSON.stringify({
   version: 3,
