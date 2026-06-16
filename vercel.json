@@ -1,6 +1,6 @@
 {
   "buildCommand": "npx bun run build",
-  "outputDirectory": ".output/public",
+  "outputDirectory": "dist/client",
   "installCommand": "npx bun install",
   "framework": null
 }
