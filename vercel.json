@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": ".output/public",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm install --force",
   "framework": null
 }
