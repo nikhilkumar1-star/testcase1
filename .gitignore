@@ -24,6 +24,9 @@ dist-ssr
 attached_assets/
 .agents/
 
+# Generated Vercel function bundle
+api/_handler.bundle.js
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

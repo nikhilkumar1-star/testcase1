@@ -1,6 +1,9 @@
 {
-  "buildCommand": "npx bun run build",
+  "buildCommand": "node scripts/vercel-build.mjs",
   "outputDirectory": "dist/client",
   "installCommand": "npx bun install",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    { "source": "/:path*", "destination": "/api/ssr" }
+  ]
 }
