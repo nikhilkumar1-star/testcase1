@@ -1,0 +1,1 @@
+import{j as e}from"./index-BPBlz25j.js";const s=()=>e.jsxs("div",{className:"p-8",children:[e.jsx("h1",{className:"text-2xl font-semibold tracking-tight",children:"Picked by Rider"}),e.jsx("p",{className:"text-sm text-muted-foreground mt-1",children:"Scan shipments handed over by pickup riders. (Module placeholder.)"})]});export{s as component};

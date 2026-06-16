@@ -1,0 +1,1 @@
+import{j as t}from"./index-BPBlz25j.js";const s=()=>t.jsxs("div",{className:"p-8",children:[t.jsx("h1",{className:"text-2xl font-semibold tracking-tight",children:"Inscan · Bag"}),t.jsx("p",{className:"text-sm text-muted-foreground mt-1",children:"Initialize and scan inbound bags. (Module placeholder.)"})]});export{s as component};
