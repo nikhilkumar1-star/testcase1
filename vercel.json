@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npx bun run build",
   "outputDirectory": ".output/public",
-  "installCommand": "npm install --force",
+  "installCommand": "npx bun install",
   "framework": null
 }
