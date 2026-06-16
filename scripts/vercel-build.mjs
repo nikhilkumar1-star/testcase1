@@ -14,9 +14,18 @@ mkdirSync('.vercel/output/functions/ssr.func', { recursive: true });
 cpSync('dist/client/assets', '.vercel/output/static/assets', { recursive: true });
 
 // Step 4: Write SSR function entry (req/res → Fetch API wrapper)
-const entryFile = '_vercel_ssr_entry_tmp.mjs';
+const entryFile = '_vercel_ssr_entry_tmp.cjs';
 writeFileSync(entryFile, `
-import appHandler from './dist/server/server.js';
+const { createServer } = require('node:http');
+
+let _handler;
+async function getHandler() {
+  if (!_handler) {
+    const mod = await import('./dist/server/server.js');
+    _handler = mod.default;
+  }
+  return _handler;
+}
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -27,30 +36,37 @@ function readBody(req) {
   });
 }
 
-export default async function handler(req, res) {
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  const url = protocol + '://' + host + req.url;
+module.exports = async function handler(req, res) {
+  try {
+    const app = await getHandler();
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const url = protocol + '://' + host + req.url;
 
-  const headers = new Headers();
-  for (const [k, v] of Object.entries(req.headers)) {
-    if (v == null) continue;
-    if (Array.isArray(v)) v.forEach(val => headers.append(k, val));
-    else headers.set(k, v);
+    const headers = new Headers();
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (v == null) continue;
+      if (Array.isArray(v)) v.forEach(val => headers.append(k, val));
+      else headers.set(k, v);
+    }
+
+    let body = undefined;
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      body = await readBody(req);
+    }
+
+    const fetchReq = new Request(url, { method: req.method, headers, body });
+    const fetchRes = await app.fetch(fetchReq);
+
+    res.statusCode = fetchRes.status;
+    fetchRes.headers.forEach((v, k) => res.setHeader(k, v));
+    res.end(Buffer.from(await fetchRes.arrayBuffer()));
+  } catch (err) {
+    console.error('SSR function error:', err);
+    res.statusCode = 500;
+    res.end('Internal Server Error');
   }
-
-  let body = undefined;
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    body = await readBody(req);
-  }
-
-  const fetchReq = new Request(url, { method: req.method, headers, body });
-  const fetchRes = await appHandler.fetch(fetchReq);
-
-  res.statusCode = fetchRes.status;
-  fetchRes.headers.forEach((v, k) => res.setHeader(k, v));
-  res.end(Buffer.from(await fetchRes.arrayBuffer()));
-}
+};
 `);
 
 // Step 5: Bundle the SSR entry + server into a single file
@@ -61,7 +77,7 @@ execSync([
   '--bundle',
   `--outfile=.vercel/output/functions/ssr.func/index.js`,
   '--platform=node',
-  '--format=esm',
+  '--format=cjs',
   '--target=node20',
   '--external:node:*',
 ].join(' '), { stdio: 'inherit' });
@@ -77,8 +93,6 @@ writeFileSync('.vercel/output/functions/ssr.func/.vc-config.json', JSON.stringif
   shouldAddHelpers: true,
 }));
 
-// Mark function as ESM
-writeFileSync('.vercel/output/functions/ssr.func/package.json', JSON.stringify({ type: 'module' }));
 
 // Step 8: Write Vercel routing config
 writeFileSync('.vercel/output/config.json', JSON.stringify({
